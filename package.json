@@ -1,0 +1,105 @@
+{
+  "name": "vonage-test",
+  "version": "1.0",
+  "description": "Vonage test",
+  "main": "index.js",
+  "config": {
+    "gcpDev": "dev",
+    "gcpQa": "qa",
+    "gcpPre": "pre",
+    "gcpPro": "pro"
+  },
+  "scripts": {
+    "archetype": "cp ../../utils/scripts/Makefile env/MakefileCommons && tar -cvzf ${npm_package_name}.tgz --exclude='node_modules' --exclude='package-lock.json' --exclude='dist' --exclude='*skeleton.tgz' * .[^.]*",
+    "audit": "(npm run key-add || true) && (npm i --ignore-scripts || npm run clean && npm i --ignore-scripts) && npm audit --audit-level=high && exit $? ",
+    "build": "npm run audit && npm run key-remove && tsc",
+    "build-local": "cp ./env/.env.local ./env/.env && npm run build",
+    "clean": "rm -rf node_modules dist package-lock.json *.tgz || true",
+    "clean-build": "npm run clean && npm run build",
+    "compile-eslint": "cd ../../ && npm run build-eslint",
+    "copy-yaml": "rm -rf dist/server/app/v1/documentation && mkdir dist/server/app/v1/documentation && cp src/server/app/v1/documentation/* dist/server/app/v1/documentation/",
+    "deploy": "npm run key-add && gcloud app deploy app.yaml --project={GCPNAMEPROJECT} --version={VERSIONTODEPLOY} && npm run key-remove",
+    "enable-eslint": "cp -r ../../eslintRules/package.json ../../",
+    "eslint": "npm run git-hook && npm run enable-eslint && npm run compile-eslint",
+    "git-hook": "cd ../../eslintRules && npm run git-hook",
+    "key-add": "local_key=`(grep -shE 'key=(.*)' ./emergya.properties ../emergya.properties ../../emergya.properties | head -1 2> /dev/null || echo\"\") | sed -E 's#key=(.*)#\\1#'` && [ ! -z \"$local_key\" ] && (sed -i.bk -E \"s#https:\\/\\/virtual-assisant-product\\.ew\\.r\\.appspot\\.com\\/(.*)\\/(.+)\\.tgz(.)(\\,){0,1}\\$#https:\\/\\/virtual-assisant-product\\.ew\\.r\\.appspot\\.com\\/\\1\\/\\2.tgz?key=\"$local_key\"\\3\\4#g\" package.json) && rm package.json.bk || echo \"No key found\"",
+    "key-remove": "(sed -i.bk -E \"s#https:\\/\\/virtual-assisant-product\\.ew\\.r\\.appspot\\.com\\/(.*)\\/(.+)\\.tgz\\?key=([0-9a-zA-Z\\-]+)(.)(\\,){0,1}#https:\\/\\/virtual-assisant-product\\.ew\\.r\\.appspot\\.com\\/\\1\\/\\2.tgz\\4\\5#g\" package.json) && rm package.json.bk",
+    "lint": "cd ../../eslintRules && npm run lint",
+    "lint-cloud-build": "cd ../../ && npm run lint-cloud-build --libtolint=$npm_config_path/src/**/*",
+    "lint-local": "path=`pwd | rev | cut -d'/' -f 1,2 | rev` && cd ../../ && npm run lint-local --libtolint=$path/src/**/*",
+    "pre-deploy": "./node_modules/typescript/bin/tsc && echo \"DONE!\"",
+    "preinstall": "echo \"\\x1b[32m[Emergya Preinstall Clear Cache NPM]\" && npm cache clean --force",
+    "start": "node --inspect ./dist/index.js",
+    "start:watch": "nodemon --inspect=5859 --config nodemon-debug.json",
+    "test": "npm ls --depth=0 || npm run build && jest --useStderr --forceExit",
+    "test-cloud-build": "npm run clean && npm run audit && tsc && npm run key-remove"
+  },
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://www.emergyadigital.com",
+  "dependencies": {
+    "@fastify/cors": "^8.4.0",
+    "express-pino-logger": "^4.0.0",
+    "fastify": "4.26.2",
+    "serialize-error": "^8.1.0",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^28.1.3",
+    "@types/node": "^16.11.41",
+    "@types/supertest": "^2.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
+    "eslint": "8.22.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^3.0.5",
+    "jest": "^28.1.1",
+    "jscpd": "^3.3.25",
+    "nodemon": "^2.0.0",
+    "supertest": "^4.0.2",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run start:develop",
+    "ext": "ts"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "jscpd": {
+    "mode": "mild",
+    "reporters": [
+      "console"
+    ],
+    "ignore": [
+      "**/__tests__/**",
+      "doc",
+      "dist",
+      "example"
+    ],
+    "absolute": true,
+    "gitignore": true
+  }
+}
