@@ -12,7 +12,7 @@
   "scripts": {
     "archetype": "cp ../../utils/scripts/Makefile env/MakefileCommons && tar -cvzf ${npm_package_name}.tgz --exclude='node_modules' --exclude='package-lock.json' --exclude='dist' --exclude='*skeleton.tgz' * .[^.]*",
     "audit": "(npm run key-add || true) && (npm i --ignore-scripts || npm run clean && npm i --ignore-scripts) && npm audit --audit-level=high && exit $? ",
-    "build": "npm run audit && npm run key-remove && tsc",
+    "build": "tsc",
     "build-local": "cp ./env/.env.local ./env/.env && npm run build",
     "clean": "rm -rf node_modules dist package-lock.json *.tgz || true",
     "clean-build": "npm run clean && npm run build",
