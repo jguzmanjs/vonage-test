@@ -23,6 +23,10 @@ const app: FastifyInstance = fastify({
       origin: '*',
     });
 
+    app.get('/',  (request, reply) => {
+      reply.send('Hello world').code(200);
+    })
+
     // You must listen on all IPV4 addresses in Cloud Run
     const address = '0.0.0.0';
     // TODO: Add address const into listener.
